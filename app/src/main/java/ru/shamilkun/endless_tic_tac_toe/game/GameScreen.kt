@@ -56,6 +56,9 @@ fun GameScreen(
 
                         GameCell(
                             player = state.board[cellIndex],
+                            isOldest = state.board[cellIndex]?.let { player ->
+                                state.oldestCell(player) == cellIndex
+                            } == true,
                             isWinning = cellIndex in state.winningCells,
                             enabled = !state.isFinished && state.board[cellIndex] == null,
                             onClick = { onCellClick(cellIndex) },
@@ -80,6 +83,7 @@ fun GameScreen(
 @Composable
 private fun GameCell(
     player: Player?,
+    isOldest: Boolean,
     isWinning: Boolean,
     enabled: Boolean,
     onClick: () -> Unit,
@@ -89,6 +93,11 @@ private fun GameCell(
         MaterialTheme.colorScheme.primaryContainer
     } else {
         MaterialTheme.colorScheme.surface
+    }
+    val markerColor = when (player) {
+        Player.X -> MaterialTheme.colorScheme.primary
+        Player.O -> Color(0xFFD84315)
+        null -> Color.Transparent
     }
 
     Box(
@@ -107,11 +116,9 @@ private fun GameCell(
     ) {
         Text(
             text = player?.symbol.orEmpty(),
-            color = when (player) {
-                Player.X -> MaterialTheme.colorScheme.primary
-                Player.O -> Color(0xFFD84315)
-                null -> Color.Transparent
-            },
+            color = markerColor.copy(
+                alpha = if (isOldest && !isWinning) 0.35f else 1f
+            ),
             fontSize = 54.sp,
             fontWeight = FontWeight.Bold
         )
@@ -121,7 +128,6 @@ private fun GameCell(
 private fun statusText(state: GameState): String {
     return when {
         state.winner != null -> "Победил ${state.winner.symbol}"
-        state.isDraw -> "Ничья"
         else -> "Ход игрока ${state.currentPlayer.symbol}"
     }
 }

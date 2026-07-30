@@ -14,23 +14,31 @@ class GameViewModel : ViewModel() {
         if (cellIndex !in state.board.indices) return
         if (state.isFinished || state.board[cellIndex] != null) return
 
+        val player = state.currentPlayer
+        val playerMoves = state.movesFor(player)
+        val oldestCell = playerMoves
+            .firstOrNull()
+            .takeIf { playerMoves.size == MAX_MARKS_PER_PLAYER }
+
         val updatedBoard = state.board.toMutableList().apply {
-            this[cellIndex] = state.currentPlayer
+            oldestCell?.let { this[it] = null }
+            this[cellIndex] = player
         }
-        val winningCells = findWinningCells(updatedBoard, state.currentPlayer)
+        val updatedPlayerMoves = if (oldestCell != null) {
+            playerMoves.drop(1) + cellIndex
+        } else {
+            playerMoves + cellIndex
+        }
+        val updatedMoveHistory = state.moveHistory + (player to updatedPlayerMoves)
+        val winningCells = findWinningCells(updatedBoard, player)
         val hasWinner = winningCells.isNotEmpty()
-        val isDraw = !hasWinner && updatedBoard.none { it == null }
 
         state = state.copy(
             board = updatedBoard,
-            currentPlayer = if (hasWinner || isDraw) {
-                state.currentPlayer
-            } else {
-                state.currentPlayer.next()
-            },
-            winner = state.currentPlayer.takeIf { hasWinner },
-            winningCells = winningCells,
-            isDraw = isDraw
+            moveHistory = updatedMoveHistory,
+            currentPlayer = if (hasWinner) player else player.next(),
+            winner = player.takeIf { hasWinner },
+            winningCells = winningCells
         )
     }
 
