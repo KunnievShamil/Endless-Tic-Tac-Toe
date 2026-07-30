@@ -1,0 +1,32 @@
+# Android Studio / IntelliJ IDEA
+.idea/
+*.iml
+
+# Gradle and generated build output
+.gradle/
+.kotlin/
+build/
+**/build/
+
+# Local Android SDK configuration
+local.properties
+
+# Native build output
+.externalNativeBuild/
+.cxx/
+
+# Android Studio captures
+captures/
+
+# Signing keys and local signing configuration
+*.jks
+*.keystore
+keystore.properties
+signing.properties
+
+# Firebase configuration (keep outside version control)
+google-services.json
+
+# Operating system files
+.DS_Store
+Thumbs.db
